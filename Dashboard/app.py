@@ -174,6 +174,16 @@ st.sidebar.metric(
     len(filtered_df)
 )
 
+st.sidebar.metric(
+    "📊 Avg Sales",
+    f"${filtered_df['Sales'].mean():,.2f}"
+)
+
+st.sidebar.metric(
+    "💵 Avg Profit",
+    f"${filtered_df['Profit'].mean():,.2f}"
+)
+
 # ==========================
 # Dataset Preview
 # ==========================
