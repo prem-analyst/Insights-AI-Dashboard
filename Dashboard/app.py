@@ -171,7 +171,7 @@ st.sidebar.metric(
 
 st.sidebar.metric(
     "📦 Orders",
-    len(filtered_df)x
+    len(filtered_df)
 )
 
 # ==========================
