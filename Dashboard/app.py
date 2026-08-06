@@ -155,12 +155,31 @@ st.sidebar.write(f"**Region:** {selected_region}")
 st.sidebar.write(f"**Category:** {selected_category}")
 st.sidebar.write(f"**Records Found:** {len(filtered_df)}")
 
+st.sidebar.divider()
+
+st.sidebar.subheader("📊 Quick Stats")
+
+st.sidebar.metric(
+    "💰 Total Sales",
+    f"${filtered_df['Sales'].sum():,.0f}"
+)
+
+st.sidebar.metric(
+    "📈 Total Profit",
+    f"${filtered_df['Profit'].sum():,.0f}"
+)
+
+st.sidebar.metric(
+    "📦 Orders",
+    len(filtered_df)x
+)
+
 # ==========================
 # Dataset Preview
 # ==========================
 
-st.subheader("📋 Dataset Preview")
-st.dataframe(filtered_df.head())
+with st.expander("📋 View Dataset Preview"):
+    st.dataframe(filtered_df.head())
 
 # ==========================
 # KPI Metrics
@@ -181,6 +200,9 @@ col2.metric("📈 Total Profit", f"${total_profit:,.2f}")
 col3.metric("📦 Total Orders", total_orders)
 col4.metric("📊 Avg Sales", f"${avg_sales:,.2f}")
 col5.metric("💵 Avg Profit", f"${avg_profit:,.2f}")
+
+st.divider()
+
 # ==========================
 # Charts Section
 # ==========================
@@ -327,6 +349,8 @@ with col4:
 
     st.plotly_chart(fig, use_container_width=True)
 
+    st.divider()
+
 # ==========================
 # Download CSV
 # ==========================
@@ -343,10 +367,42 @@ st.download_button(
 )
 
 # ==========================
-# Business Insights
+# Sales by State (Interactive Map)
 # ==========================
 
-st.subheader("📌 Business Insights")
+st.subheader("🌍 Sales by State")
+
+state_sales = (
+    filtered_df.groupby("State")["Sales"]
+    .sum()
+    .reset_index()
+)
+
+fig = px.choropleth(
+    state_sales,
+    locations="State",
+    locationmode="USA-states",
+    color="Sales",
+    scope="usa",
+    color_continuous_scale="Blues",
+    hover_name="State",
+    title="State-wise Sales Distribution"
+)
+
+fig.update_layout(
+    template="plotly_white",
+    title_x=0.5
+)
+
+st.plotly_chart(fig, use_container_width=True)
+
+st.divider()
+
+# ==========================
+# AI Business Insights
+# ==========================
+
+st.subheader("🤖 AI Business Insights")
 
 highest_category = (
     filtered_df.groupby("Category")["Sales"]
@@ -360,20 +416,40 @@ highest_city = (
     .idxmax()
 )
 
-st.success(f"🏆 Highest Sales Category: {highest_category}")
+highest_state = (
+    filtered_df.groupby("State")["Sales"]
+    .sum()
+    .idxmax()
+)
 
-st.success(f"🌍 Top Sales City: {highest_city}")
+best_segment = (
+    filtered_df.groupby("Segment")["Profit"]
+    .sum()
+    .idxmax()
+)
+
+avg_discount = filtered_df["Discount"].mean()
+
+st.success(f"🏆 Highest Sales Category: **{highest_category}**")
+
+st.success(f"🌍 Top Sales City: **{highest_city}**")
+
+st.success(f"📍 Best Performing State: **{highest_state}**")
+
+st.success(f"👥 Most Profitable Segment: **{best_segment}**")
+
+st.warning(f"🎯 Average Discount Offered: **{avg_discount:.2%}**")
 
 st.info("""
-### 📈 Recommendations
+### 📈 AI Recommendations
 
-• Focus marketing on top-performing cities.
+✅ Increase stock in top-performing states.
 
-• Increase inventory for high-selling categories.
+✅ Focus marketing on profitable customer segments.
 
-• Use Region and Category filters to discover new business opportunities.
+✅ Review discount strategy to maximize profit.
 
-• Download filtered data for further analysis.
+✅ Expand high-performing categories across more regions.
 """)
 # ==========================
 # Footer
