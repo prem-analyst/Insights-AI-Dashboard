@@ -20,7 +20,7 @@ st.set_page_config(
 st.markdown("""
 <style>
 
-/* Main background */
+/* Main Background */
 .stApp{
     background-color:#F7F9FC;
 }
@@ -28,7 +28,22 @@ st.markdown("""
 /* Sidebar */
 section[data-testid="stSidebar"]{
     background:#1E293B;
+}
+
+/* Sidebar General Text */
+section[data-testid="stSidebar"]{
+    background:#1E293B;
     color:white;
+}
+
+section[data-testid="stSidebar"] h1,
+section[data-testid="stSidebar"] h2,
+section[data-testid="stSidebar"] h3,
+section[data-testid="stSidebar"] h4,
+section[data-testid="stSidebar"] p,
+section[data-testid="stSidebar"] span,
+section[data-testid="stSidebar"] div{
+    color:white !important;
 }
 
 /* Headers */
@@ -42,12 +57,13 @@ h1,h2,h3{
     color:white;
     border-radius:10px;
 }
-/* KPI Metric Cards */
+
+/* KPI Cards */
 div[data-testid="stMetric"]{
-    background-color:white;
+    background:white;
     border:1px solid #E5E7EB;
-    padding:15px;
     border-radius:15px;
+    padding:15px;
     box-shadow:0 2px 8px rgba(0,0,0,0.08);
 }
 
@@ -91,12 +107,31 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 DATA_FILE = BASE_DIR / "Data" / "SampleSuperstore.csv"
 
 df = pd.read_csv(DATA_FILE)
+st.write(df.columns.tolist())
 
 # ==========================
 # Sidebar Info
 # ==========================
 
 st.sidebar.title("📊 Insights AI")
+
+# ==========================
+# Sidebar Navigation
+# ==========================
+
+page = st.sidebar.radio(
+    "📂 Navigation",
+    [
+        "🏠 Dashboard",
+        "📊 Sales Analysis",
+        "💰 Profit Analysis",
+        "🌍 Geography",
+        "🤖 AI Insights",
+        "ℹ️ About"
+    ]
+)
+
+st.sidebar.divider()
 
 st.sidebar.markdown("""
 ### Data Analytics Dashboard
@@ -155,34 +190,6 @@ st.sidebar.write(f"**Region:** {selected_region}")
 st.sidebar.write(f"**Category:** {selected_category}")
 st.sidebar.write(f"**Records Found:** {len(filtered_df)}")
 
-st.sidebar.divider()
-
-st.sidebar.subheader("📊 Quick Stats")
-
-st.sidebar.metric(
-    "💰 Total Sales",
-    f"${filtered_df['Sales'].sum():,.0f}"
-)
-
-st.sidebar.metric(
-    "📈 Total Profit",
-    f"${filtered_df['Profit'].sum():,.0f}"
-)
-
-st.sidebar.metric(
-    "📦 Orders",
-    len(filtered_df)
-)
-
-st.sidebar.metric(
-    "📊 Avg Sales",
-    f"${filtered_df['Sales'].mean():,.2f}"
-)
-
-st.sidebar.metric(
-    "💵 Avg Profit",
-    f"${filtered_df['Profit'].mean():,.2f}"
-)
 
 # ==========================
 # Dataset Preview
@@ -408,6 +415,147 @@ st.plotly_chart(fig, use_container_width=True)
 
 st.divider()
 
+st.subheader("💹 Profit vs Discount Analysis")
+
+fig = px.scatter(
+    filtered_df,
+    x="Discount",
+    y="Profit",
+    color="Category",
+    size="Sales",
+    hover_data=["Sub-Category", "Region"],
+    title="Profit vs Discount"
+)
+
+fig.update_layout(
+    template="plotly_white",
+    title_x=0.5,
+    xaxis_title="Discount",
+    yaxis_title="Profit"
+)
+
+st.plotly_chart(fig, use_container_width=True)
+st.divider()
+
+st.subheader("🏆 Top 10 Sub-Categories by Profit")
+
+top_profit_subcategory = (
+    filtered_df.groupby("Sub-Category")["Profit"]
+    .sum()
+    .sort_values(ascending=False)
+    .head(10)
+    .reset_index()
+)
+
+fig = px.bar(
+    top_profit_subcategory,
+    x="Profit",
+    y="Sub-Category",
+    orientation="h",
+    color="Profit",
+    title="Top 10 Most Profitable Sub-Categories"
+)
+
+fig.update_layout(
+    template="plotly_white",
+    title_x=0.5,
+    xaxis_title="Profit",
+    yaxis_title="Sub-Category"
+)
+
+st.plotly_chart(fig, use_container_width=True)
+
+st.divider()
+
+st.subheader("📋 Business Summary")
+
+summary_df = (
+    filtered_df
+    .groupby("Category")
+    .agg({
+        "Sales":"sum",
+        "Profit":"sum",
+        "Quantity":"sum",
+        "Discount":"mean"
+    })
+    .reset_index()
+)
+
+summary_df["Sales"] = summary_df["Sales"].round(2)
+summary_df["Profit"] = summary_df["Profit"].round(2)
+summary_df["Discount"] = (summary_df["Discount"]*100).round(2)
+
+st.dataframe(
+    summary_df,
+    use_container_width=True,
+    hide_index=True
+)
+st.divider()
+
+st.subheader("🎯 Business Performance Score")
+
+sales = filtered_df["Sales"].sum()
+profit = filtered_df["Profit"].sum()
+discount = filtered_df["Discount"].mean()
+quantity = filtered_df["Quantity"].sum()
+
+score = 0
+
+# Sales Score (30 Marks)
+if sales >= 800000:
+    score += 30
+elif sales >= 500000:
+    score += 22
+elif sales >= 300000:
+    score += 15
+else:
+    score += 8
+
+# Profit Score (30 Marks)
+if profit >= 100000:
+    score += 30
+elif profit >= 50000:
+    score += 22
+elif profit >= 20000:
+    score += 15
+else:
+    score += 8
+
+# Discount Score (20 Marks)
+if discount <= 0.10:
+    score += 20
+elif discount <= 0.20:
+    score += 15
+elif discount <= 0.30:
+    score += 10
+else:
+    score += 5
+
+# Quantity Score (20 Marks)
+if quantity >= 9000:
+    score += 20
+elif quantity >= 6000:
+    score += 15
+elif quantity >= 3000:
+    score += 10
+else:
+    score += 5
+
+st.progress(score / 100)
+
+if score >= 85:
+    st.success(f"🏆 Overall Business Score: {score}/100 (Excellent)")
+elif score >= 70:
+    st.success(f"✅ Overall Business Score: {score}/100 (Good)")
+elif score >= 50:
+    st.warning(f"⚠️ Overall Business Score: {score}/100 (Average)")
+else:
+    st.error(f"❌ Overall Business Score: {score}/100 (Needs Improvement)")
+
+st.caption(
+    "Score is calculated based on Sales, Profit, Discount and Quantity performance."
+)
+
 # ==========================
 # AI Business Insights
 # ==========================
@@ -461,6 +609,131 @@ st.info("""
 
 ✅ Expand high-performing categories across more regions.
 """)
+
+st.divider()
+
+st.subheader("🤖 Ask AI About Your Business")
+
+question = st.text_input(
+    "Ask a question",
+    placeholder="Example: Which category is most profitable?"
+)
+
+if st.button("🚀 Ask AI"):
+
+    q = question.lower()
+
+    if "category" in q and "profit" in q:
+        ans = (
+            filtered_df.groupby("Category")["Profit"]
+            .sum()
+            .idxmax()
+        )
+        st.success(f"🏆 Most Profitable Category: **{ans}**")
+
+    elif "category" in q and "sales" in q:
+        ans = (
+            filtered_df.groupby("Category")["Sales"]
+            .sum()
+            .idxmax()
+        )
+        st.success(f"💰 Highest Sales Category: **{ans}**")
+
+    elif "city" in q:
+        ans = (
+            filtered_df.groupby("City")["Sales"]
+            .sum()
+            .idxmax()
+        )
+        st.success(f"🌍 Top Sales City: **{ans}**")
+
+    elif "state" in q:
+        ans = (
+            filtered_df.groupby("State")["Profit"]
+            .sum()
+            .idxmax()
+        )
+        st.success(f"📍 Best Performing State: **{ans}**")
+
+    elif "discount" in q:
+        avg_discount = filtered_df["Discount"].mean()
+        st.success(f"🎯 Average Discount: **{avg_discount:.2%}**")
+
+    else:
+        st.info(
+            "🤖 I can answer questions about Sales, Profit, Category, City, State and Discount."
+        )
+
+# ==========================
+# Top Products Analysis
+# ==========================
+
+st.divider()
+
+st.subheader("🏆 Top Products Analysis")
+
+col1, col2 = st.columns(2)
+
+# -------------------------
+# Top Products by Sales
+# -------------------------
+
+with col1:
+
+    top_products_sales = (
+        filtered_df.groupby("Sub-Category")["Sales"]
+        .sum()
+        .sort_values(ascending=False)
+        .head(10)
+        .reset_index()
+    )
+
+    fig = px.bar(
+        top_products_sales,
+        x="Sales",
+        y="Sub-Category",
+        orientation="h",
+        color="Sales",
+        title="Top 10 Products by Sales"
+    )
+
+    fig.update_layout(
+        template="plotly_white",
+        title_x=0.5
+    )
+
+    st.plotly_chart(fig, use_container_width=True)
+
+# -------------------------
+# Top Products by Profit
+# -------------------------
+
+with col2:
+
+    top_products_profit = (
+        filtered_df.groupby("Sub-Category")["Profit"]
+        .sum()
+        .sort_values(ascending=False)
+        .head(10)
+        .reset_index()
+    )
+
+    fig = px.bar(
+        top_products_profit,
+        x="Profit",
+        y="Sub-Category",
+        orientation="h",
+        color="Profit",
+        title="Top 10 Products by Profit"
+    )
+
+    fig.update_layout(
+        template="plotly_white",
+        title_x=0.5
+    )
+
+    st.plotly_chart(fig, use_container_width=True)
+
 # ==========================
 # Footer
 # ==========================
