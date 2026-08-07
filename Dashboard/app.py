@@ -107,7 +107,6 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 DATA_FILE = BASE_DIR / "Data" / "SampleSuperstore.csv"
 
 df = pd.read_csv(DATA_FILE)
-st.write(df.columns.tolist())
 
 # ==========================
 # Sidebar Info
