@@ -2,6 +2,10 @@ import plotly.express as px
 import streamlit as st
 import pandas as pd
 from pathlib import Path
+from io import BytesIO
+
+from reportlab.platypus import SimpleDocTemplate, Paragraph
+from reportlab.lib.styles import getSampleStyleSheet
 
 # ==========================
 # Page Configuration
@@ -732,6 +736,60 @@ with col2:
     )
 
     st.plotly_chart(fig, use_container_width=True)
+
+def generate_pdf_report():
+
+    buffer = BytesIO()
+
+    doc = SimpleDocTemplate(buffer)
+
+    styles = getSampleStyleSheet()
+
+    story = []
+
+    story.append(Paragraph("<b>Insights AI Dashboard Report</b>", styles["Title"]))
+    story.append(Paragraph("<br/>", styles["Normal"]))
+
+    story.append(Paragraph(f"Total Sales: ${total_sales:,.2f}", styles["BodyText"]))
+    story.append(Paragraph(f"Total Profit: ${total_profit:,.2f}", styles["BodyText"]))
+    story.append(Paragraph(f"Total Orders: {total_orders}", styles["BodyText"]))
+    story.append(Paragraph(f"Average Sales: ${avg_sales:,.2f}", styles["BodyText"]))
+    story.append(Paragraph(f"Average Profit: ${avg_profit:,.2f}", styles["BodyText"]))
+    story.append(Paragraph(f"Business Score: {score}/100", styles["BodyText"]))
+
+    story.append(Paragraph("<br/>", styles["Normal"]))
+
+    story.append(
+        Paragraph(
+            "Generated using Insights AI Dashboard",
+            styles["Italic"]
+        )
+    )
+
+    doc.build(story)
+
+    pdf = buffer.getvalue()
+
+    buffer.close()
+
+    return pdf
+
+# ==========================
+# PDF Report Download
+# ==========================
+
+st.divider()
+
+st.subheader("📄 Business Report")
+
+pdf_file = generate_pdf_report()
+
+st.download_button(
+    label="📥 Download Business Report",
+    data=pdf_file,
+    file_name="Insights_AI_Business_Report.pdf",
+    mime="application/pdf"
+)
 
 # ==========================
 # Footer
