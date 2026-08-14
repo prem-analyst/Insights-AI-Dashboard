@@ -565,6 +565,10 @@ st.caption(
 
 st.subheader("🤖 AI Business Insights")
 
+# --------------------------------
+# Key Business Insights
+# --------------------------------
+
 highest_category = (
     filtered_df.groupby("Category")["Sales"]
     .sum()
@@ -591,80 +595,764 @@ best_segment = (
 
 avg_discount = filtered_df["Discount"].mean()
 
-st.success(f"🏆 Highest Sales Category: **{highest_category}**")
 
-st.success(f"🌍 Top Sales City: **{highest_city}**")
+# --------------------------------
+# Insight Cards
+# --------------------------------
 
-st.success(f"📍 Best Performing State: **{highest_state}**")
+col1, col2, col3 = st.columns(3)
 
-st.success(f"👥 Most Profitable Segment: **{best_segment}**")
+with col1:
+    st.success(
+        f"🏆 **Highest Sales Category**\n\n"
+        f"### {highest_category}"
+    )
 
-st.warning(f"🎯 Average Discount Offered: **{avg_discount:.2%}**")
+with col2:
+    st.success(
+        f"🌍 **Top Sales City**\n\n"
+        f"### {highest_city}"
+    )
 
-st.info("""
-### 📈 AI Recommendations
+with col3:
+    st.success(
+        f"📍 **Best Performing State**\n\n"
+        f"### {highest_state}"
+    )
 
-✅ Increase stock in top-performing states.
 
-✅ Focus marketing on profitable customer segments.
+col4, col5 = st.columns(2)
 
-✅ Review discount strategy to maximize profit.
+with col4:
+    st.success(
+        f"👥 **Most Profitable Segment**\n\n"
+        f"### {best_segment}"
+    )
 
-✅ Expand high-performing categories across more regions.
-""")
+with col5:
+    st.warning(
+        f"🎯 **Average Discount Offered**\n\n"
+        f"### {avg_discount:.2%}"
+    )
+
 
 st.divider()
+
+
+# --------------------------------
+# AI Recommendations
+# --------------------------------
+
+st.subheader("📈 AI Recommendations")
+
+rec_col1, rec_col2 = st.columns(2)
+
+with rec_col1:
+
+    st.info(
+        "📦 **Inventory Strategy**\n\n"
+        "Increase stock availability in top-performing states "
+        "to support stronger sales."
+    )
+
+    st.info(
+        "🎯 **Marketing Strategy**\n\n"
+        "Focus marketing efforts on profitable customer segments."
+    )
+
+with rec_col2:
+
+    st.info(
+        "💰 **Discount Strategy**\n\n"
+        "Review discount levels to balance sales growth with profit."
+    )
+
+    st.info(
+        "🚀 **Growth Strategy**\n\n"
+        "Expand high-performing categories into other promising regions."
+    )
+
+
+st.divider()
+
+
+# ==========================
+# Ask AI
+# ==========================
 
 st.subheader("🤖 Ask AI About Your Business")
 
 question = st.text_input(
-    "Ask a question",
+    "💬 Ask your business question",
     placeholder="Example: Which category is most profitable?"
 )
 
-if st.button("🚀 Ask AI"):
+st.caption(
+    "💡 Try questions about sales, profit, cities, states, regions, "
+    "categories, sub-categories, discounts, or quantity."
+)
+def normalize_business_question(question):
+    q = question.lower().strip()
 
-    q = question.lower()
+    # Profit-related words
+    profit_words = [
+        "profit",
+        "profitable",
+        "profitability",
+        "earn",
+        "earns", 
+        "earning",
+        "earnings",
+        "money",
+        "income",
+        "gain"
+    ]
 
-    if "category" in q and "profit" in q:
-        ans = (
-            filtered_df.groupby("Category")["Profit"]
-            .sum()
-            .idxmax()
-        )
-        st.success(f"🏆 Most Profitable Category: **{ans}**")
+    # Sales-related words
+    sales_words = [
+        "sales",
+        "revenue",
+        "sold",
+        "selling",
+        "turnover"
+    ]
 
-    elif "category" in q and "sales" in q:
-        ans = (
-            filtered_df.groupby("Category")["Sales"]
-            .sum()
-            .idxmax()
-        )
-        st.success(f"💰 Highest Sales Category: **{ans}**")
+    # Loss-related words
+    loss_words = [
+        "loss",
+        "losing",
+        "negative profit",
+        "money losing",
+        "loss making"
+    ]
 
-    elif "city" in q:
-        ans = (
-            filtered_df.groupby("City")["Sales"]
-            .sum()
-            .idxmax()
-        )
-        st.success(f"🌍 Top Sales City: **{ans}**")
+    # Dimension detection
+    dimensions = {
+        "category": ["category", "categories"],
+        "sub_category": ["sub-category", "subcategory", "sub category"],
+        "region": ["region", "market", "area"],
+        "state": ["state", "states"],
+        "city": ["city", "cities"],
+        "segment": ["segment", "customer group", "customer segment"],
+        "product": ["product", "products"]
+    }
 
-    elif "state" in q:
-        ans = (
-            filtered_df.groupby("State")["Profit"]
-            .sum()
-            .idxmax()
-        )
-        st.success(f"📍 Best Performing State: **{ans}**")
+    if any(word in q for word in loss_words):
+        metric = "loss"
+
+    elif any(word in q for word in profit_words):
+        metric = "profit"
+
+    elif any(word in q for word in sales_words):
+        metric = "sales"
 
     elif "discount" in q:
-        avg_discount = filtered_df["Discount"].mean()
-        st.success(f"🎯 Average Discount: **{avg_discount:.2%}**")
+        metric = "discount"
+
+    elif "quantity" in q or "units" in q:
+        metric = "quantity"
 
     else:
+        metric = None
+
+    dimension = None
+
+    for name, keywords in dimensions.items():
+        if any(word in q for word in keywords):
+            dimension = name
+            break
+
+    return {
+        "question": q,
+        "metric": metric,
+        "dimension": dimension
+    }
+
+if st.button("🚀 Ask AI"):
+
+    analysis = normalize_business_question(question)
+
+    q = analysis["question"].strip().lower()
+    metric = analysis["metric"]
+    dimension = analysis["dimension"]
+
+    # --------------------------------
+    # Empty Question
+    # --------------------------------
+
+    if not q:
+
+        st.warning("Please enter a question first.")
+
+       # --------------------------------
+    # Business Summary
+    # --------------------------------
+
+    elif "summary" in q or "business performance" in q:
+
+        total_sales = filtered_df["Sales"].sum()
+        total_profit = filtered_df["Profit"].sum()
+        avg_discount = filtered_df["Discount"].mean()
+        total_quantity = filtered_df["Quantity"].sum()
+
+        st.subheader("📊 Business Summary")
+
+        col1, col2, col3, col4 = st.columns(4)
+
+        with col1:
+            st.metric(
+                "💰 Total Sales",
+                f"${total_sales:,.2f}"
+            )
+
+        with col2:
+            st.metric(
+                "📈 Total Profit",
+                f"${total_profit:,.2f}"
+            )
+
+        with col3:
+            st.metric(
+                "🎯 Avg Discount",
+                f"{avg_discount:.2%}"
+            )
+
+        with col4:
+            st.metric(
+                "📦 Quantity Sold",
+                f"{total_quantity:,.0f}"
+            )
+
+        # --------------------------------
+    # Loss / Negative Profit
+    # --------------------------------
+
+    elif "loss" in q or "negative profit" in q:
+
+        result = (
+            filtered_df.groupby("Sub-Category")["Profit"]
+            .sum()
+            .sort_values()
+        )
+
+        result = result[result < 0].head(10)
+
+        if len(result) > 0:
+
+            loss_table = result.reset_index()
+
+            total_loss = result.sum()
+
+            st.write("⚠️ **Loss-Making Sub-Categories**")
+
+            st.metric(
+                "⚠️ Total Loss",
+                f"${abs(total_loss):,.2f}"
+            )
+
+            st.bar_chart(
+                loss_table.set_index("Sub-Category")["Profit"]
+            )
+
+            st.dataframe(
+                loss_table,
+                use_container_width=True
+            )
+
+        else:
+
+            st.success(
+                "✅ No loss-making sub-categories found."
+            )
+
+        # --------------------------------
+    # Top 5 Ranking
+    # --------------------------------
+
+    elif "top 5" in q or "top five" in q:
+
+                # Top 5 Cities by Profit
+        if ("city" in q or "cities" in q) and "profit" in q:
+
+            result = (
+                filtered_df.groupby("City")["Profit"]
+                .sum()
+                .sort_values(ascending=False)
+                .head(5)
+                .reset_index()
+            )
+
+            st.write("🏆 **Top 5 Cities by Profit**")
+
+            st.bar_chart(
+                result.set_index("City")["Profit"]
+            )
+
+            st.dataframe(
+                result,
+                use_container_width=True
+            )
+
+                # Top 5 Cities by Sales
+        elif ("city" in q or "cities" in q) and "sales" in q:
+
+            result = (
+                filtered_df.groupby("City")["Sales"]
+                .sum()
+                .sort_values(ascending=False)
+                .head(5)
+                .reset_index()
+            )
+
+            st.write("💰 **Top 5 Cities by Sales**")
+
+            st.bar_chart(
+                result.set_index("City")["Sales"]
+            )
+
+            st.dataframe(
+                result,
+                use_container_width=True
+            )
+
+                # Top 5 States by Profit
+        elif ("state" in q or "states" in q) and "profit" in q:
+
+            result = (
+                filtered_df.groupby("State")["Profit"]
+                .sum()
+                .sort_values(ascending=False)
+                .head(5)
+                .reset_index()
+            )
+
+            st.write("🏆 **Top 5 States by Profit**")
+
+            st.bar_chart(
+                result.set_index("State")["Profit"]
+            )
+
+            st.dataframe(
+                result,
+                use_container_width=True
+            )
+
+                # Top 5 States by Sales
+        elif ("state" in q or "states" in q) and "sales" in q:
+
+            result = (
+                filtered_df.groupby("State")["Sales"]
+                .sum()
+                .sort_values(ascending=False)
+                .head(5)
+                .reset_index()
+            )
+
+            st.write("💰 **Top 5 States by Sales**")
+
+            st.bar_chart(
+                result.set_index("State")["Sales"]
+            )
+
+            st.dataframe(
+                result,
+                use_container_width=True
+            )
+
+                # Top 5 Categories by Profit
+        elif ("category" in q or "categories" in q) and "profit" in q:
+
+            result = (
+                filtered_df.groupby("Category")["Profit"]
+                .sum()
+                .sort_values(ascending=False)
+                .head(5)
+                .reset_index()
+            )
+
+            st.write("🏆 **Top 5 Categories by Profit**")
+
+            st.bar_chart(
+                result.set_index("Category")["Profit"]
+            )
+
+            st.dataframe(
+                result,
+                use_container_width=True
+            )
+
+               # Top 5 Categories by Sales
+        elif ("category" in q or "categories" in q) and "sales" in q:
+
+            result = (
+                filtered_df.groupby("Category")["Sales"]
+                .sum()
+                .sort_values(ascending=False)
+                .head(5)
+                .reset_index()
+            )
+
+            st.write("💰 **Top 5 Categories by Sales**")
+
+            st.bar_chart(
+                result.set_index("Category")["Sales"]
+            )
+
+            st.dataframe(
+                result,
+                use_container_width=True
+            )
+
+                # Top 5 Sub-Categories by Profit
+        elif (
+            (
+                "product" in q
+                or "products" in q
+                or "sub-category" in q
+                or "subcategory" in q
+                or "sub category" in q
+            )
+            and "profit" in q
+        ):
+
+            result = (
+                filtered_df.groupby("Sub-Category")["Profit"]
+                .sum()
+                .sort_values(ascending=False)
+                .head(5)
+                .reset_index()
+            )
+
+            st.write("🏆 **Top 5 Sub-Categories by Profit**")
+
+            st.bar_chart(
+                result.set_index("Sub-Category")["Profit"]
+            )
+
+            st.dataframe(
+                result,
+                use_container_width=True
+            )
+
+                # Top 5 Sub-Categories by Sales
+        elif (
+            (
+                "product" in q
+                or "products" in q
+                or "sub-category" in q
+                or "subcategory" in q
+                or "sub category" in q
+            )
+            and "sales" in q
+        ):
+
+            result = (
+                filtered_df.groupby("Sub-Category")["Sales"]
+                .sum()
+                .sort_values(ascending=False)
+                .head(5)
+                .reset_index()
+            )
+
+            st.write("💰 **Top 5 Sub-Categories by Sales**")
+
+            st.bar_chart(
+                result.set_index("Sub-Category")["Sales"]
+            )
+
+            st.dataframe(
+                result,
+                use_container_width=True
+            )
+
+        else:
+
+            st.info(
+                "🤖 Try asking:\n\n"
+                "• Top 5 states by sales\n"
+                "• Top 5 states by profit\n"
+                "• Top 5 cities by sales\n"
+                "• Top 5 cities by profit\n"
+                "• Top 5 categories by sales\n"
+                "• Top 5 categories by profit\n"
+                "• Top 5 sub-categories by sales\n"
+                "• Top 5 sub-categories by profit"
+            )
+
+    # --------------------------------
+    # Total / Average Metrics
+    # --------------------------------
+
+    elif "total sales" in q or "sales total" in q:
+
+        value = filtered_df["Sales"].sum()
+
+        st.success(
+            f"💰 Total Sales: **${value:,.2f}**"
+        )
+
+    elif "total profit" in q or "profit total" in q:
+
+        value = filtered_df["Profit"].sum()
+
+        st.success(
+            f"📈 Total Profit: **${value:,.2f}**"
+        )
+
+    elif "average sales" in q or "avg sales" in q:
+
+        value = filtered_df["Sales"].mean()
+
+        st.success(
+            f"💰 Average Sales: **${value:,.2f}**"
+        )
+
+    elif "average profit" in q or "avg profit" in q:
+
+        value = filtered_df["Profit"].mean()
+
+        st.success(
+            f"📈 Average Profit: **${value:,.2f}**"
+        )
+
+    elif "average discount" in q or "avg discount" in q:
+
+        value = filtered_df["Discount"].mean()
+
+        st.success(
+            f"🎯 Average Discount: **{value:.2%}**"
+        )
+
+    elif "total quantity" in q or "quantity sold" in q:
+
+        value = filtered_df["Quantity"].sum()
+
+        st.success(
+            f"📦 Total Quantity Sold: **{value:,.0f}**"
+        )
+
+    # --------------------------------
+    # Category Analysis
+    # --------------------------------
+
+    elif dimension == "category" and metric == "profit":
+
+        result = (
+            filtered_df.groupby("Category")["Profit"]
+            .sum()
+            .sort_values(ascending=False)
+        )
+
+        best = result.idxmax()
+        value = result.max()
+
+        st.success(
+            f"🏆 Most Profitable Category: **{best}** "
+            f"(${value:,.2f} profit)"
+        )
+
+    elif dimension == "category" and metric == "sales":
+
+        result = (
+            filtered_df.groupby("Category")["Sales"]
+            .sum()
+            .sort_values(ascending=False)
+        )
+
+        best = result.idxmax()
+        value = result.max()
+
+        st.success(
+            f"💰 Highest Sales Category: **{best}** "
+            f"(${value:,.2f} sales)"
+        )
+
+        # --------------------------------
+    # Region Analysis
+    # --------------------------------
+
+    elif "region" in q and "profit" in q:
+
+        result = (
+            filtered_df.groupby("Region")["Profit"]
+            .sum()
+            .sort_values(ascending=False)
+        )
+
+        best = result.idxmax()
+        value = result.max()
+
+        st.success(
+            f"📍 Most Profitable Region: **{best}** "
+            f"(${value:,.2f} profit)"
+        )
+
+    elif "region" in q and "sales" in q:
+
+        result = (
+            filtered_df.groupby("Region")["Sales"]
+            .sum()
+            .sort_values(ascending=False)
+        )
+
+        best = result.idxmax()
+        value = result.max()
+
+        st.success(
+            f"🌎 Highest Sales Region: **{best}** "
+            f"(${value:,.2f} sales)"
+        )
+
+    # --------------------------------
+    # City Analysis
+    # --------------------------------
+
+    elif dimension == "city" and metric == "profit":
+
+        result = (
+            filtered_df.groupby("City")["Profit"]
+            .sum()
+            .sort_values(ascending=False)
+        )
+
+        best = result.idxmax()
+
+        st.success(
+            f"🏙️ Most Profitable City: **{best}** "
+            f"(${result.max():,.2f} profit)"
+        )
+
+    elif dimension == "city" and metric == "sales":
+
+        result = (
+            filtered_df.groupby("City")["Sales"]
+            .sum()
+            .sort_values(ascending=False)
+        )
+
+        best = result.idxmax()
+
+        st.success(
+            f"🏙️ Highest Sales City: **{best}** "
+            f"(${result.max():,.2f} sales)"
+        )
+
+    # --------------------------------
+    # State Analysis
+    # --------------------------------
+
+    elif dimension == "state" and metric == "profit":
+
+        result = (
+            filtered_df.groupby("State")["Profit"]
+            .sum()
+            .sort_values(ascending=False)
+        )
+
+        best = result.idxmax()
+
+        st.success(
+            f"📍 Most Profitable State: **{best}** "
+            f"(${result.max():,.2f} profit)"
+        )
+
+    elif dimension == "state" and metric == "sales":
+
+        result = (
+            filtered_df.groupby("State")["Sales"]
+            .sum()
+            .sort_values(ascending=False)
+        )
+
+        best = result.idxmax()
+
+        st.success(
+            f"📍 Highest Sales State: **{best}** "
+            f"(${result.max():,.2f} sales)"
+        )
+
+    # --------------------------------
+    # Segment Analysis
+    # --------------------------------
+
+    elif dimension == "segment" and metric == "profit":
+
+        result = (
+            filtered_df.groupby("Segment")["Profit"]
+            .sum()
+            .sort_values(ascending=False)
+        )
+
+        best = result.idxmax()
+
+        st.success(
+            f"👥 Most Profitable Segment: **{best}** "
+            f"(${result.max():,.2f} profit)"
+        )
+
+    elif dimension == "segment" and metric == "sales":
+
+        result = (
+            filtered_df.groupby("Segment")["Sales"]
+            .sum()
+            .sort_values(ascending=False)
+        )
+
+        best = result.idxmax()
+
+        st.success(
+            f"👥 Highest Sales Segment: **{best}** "
+            f"(${result.max():,.2f} sales)"
+        )
+
+    # --------------------------------
+    # Sub-Category Analysis
+    # --------------------------------
+
+    elif dimension == "sub_category" and metric == "profit":
+
+        result = (
+            filtered_df.groupby("Sub-Category")["Profit"]
+            .sum()
+            .sort_values(ascending=False)
+        )
+
+        best = result.idxmax()
+
+        st.success(
+            f"🏆 Most Profitable Sub-Category: **{best}** "
+            f"(${result.max():,.2f} profit)"
+        )
+
+    elif dimension == "sub_category" and metric == "sales":
+
+        result = (
+            filtered_df.groupby("Sub-Category")["Sales"]
+            .sum()
+            .sort_values(ascending=False)
+        )
+
+        best = result.idxmax()
+
+        st.success(
+            f"💰 Highest Sales Sub-Category: **{best}** "
+            f"(${result.max():,.2f} sales)"
+        )
+
+    # --------------------------------
+    # Fallback
+    # --------------------------------
+
+    else:
+
         st.info(
-            "🤖 I can answer questions about Sales, Profit, Category, City, State and Discount."
+            """
+🤖 I couldn't identify the exact analysis yet.
+
+Try asking about:
+
+**Sales • Profit • Discount • Category • Region • State • City • Segment • Products • Business Performance**
+"""
         )
 
 # ==========================
