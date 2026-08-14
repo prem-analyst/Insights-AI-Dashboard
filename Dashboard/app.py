@@ -396,6 +396,142 @@ with col2:
     st.plotly_chart(fig, use_container_width=True)
 
 # ==========================
+# Top Performing Sub-Categories
+# ==========================
+
+st.divider()
+
+st.subheader("🏆 Top Performing Sub-Categories")
+
+col1, col2 = st.columns(2)
+
+# --------------------------
+# Top Sub-Categories by Sales
+# --------------------------
+
+with col1:
+
+    st.write("💰 **Top Sub-Categories by Sales**")
+
+    sales_by_subcategory = (
+        filtered_df.groupby("Sub-Category")["Sales"]
+        .sum()
+        .sort_values(ascending=False)
+        .head(10)
+        .sort_values()
+        .reset_index()
+    )
+
+    fig = px.bar(
+        sales_by_subcategory,
+        x="Sales",
+        y="Sub-Category",
+        orientation="h",
+        color="Sub-Category",
+        title="Top 10 Sub-Categories by Sales"
+    )
+
+    fig.update_layout(
+        template="plotly_white",
+        title_x=0.5,
+        paper_bgcolor="white",
+        plot_bgcolor="white"
+    )
+
+    st.plotly_chart(
+        fig,
+        use_container_width=True
+    )
+
+# --------------------------
+# Top Sub-Categories by Profit
+# --------------------------
+
+with col2:
+
+    st.write("📈 **Top Sub-Categories by Profit**")
+
+    profit_by_subcategory = (
+        filtered_df.groupby("Sub-Category")["Profit"]
+        .sum()
+        .sort_values(ascending=False)
+        .head(10)
+        .sort_values()
+        .reset_index()
+    )
+
+    fig = px.bar(
+        profit_by_subcategory,
+        x="Profit",
+        y="Sub-Category",
+        orientation="h",
+        color="Sub-Category",
+        title="Top 10 Sub-Categories by Profit"
+    )
+
+    fig.update_layout(
+        template="plotly_white",
+        title_x=0.5,
+        paper_bgcolor="white",
+        plot_bgcolor="white"
+    )
+
+    st.plotly_chart(
+        fig,
+        use_container_width=True
+    )
+
+# ==========================
+# Loss Analysis
+# ==========================
+
+st.divider()
+
+st.subheader("🔴 Loss-Making Sub-Categories")
+
+loss_by_subcategory = (
+    filtered_df.groupby("Sub-Category")["Profit"]
+    .sum()
+    .reset_index()
+)
+
+loss_by_subcategory = (
+    loss_by_subcategory[
+        loss_by_subcategory["Profit"] < 0
+    ]
+    .sort_values("Profit")
+)
+
+if loss_by_subcategory.empty:
+
+    st.success(
+        "🎉 No loss-making sub-categories found for the current filters."
+    )
+
+else:
+
+    fig = px.bar(
+        loss_by_subcategory,
+        x="Profit",
+        y="Sub-Category",
+        orientation="h",
+        color="Profit",
+        title="Loss-Making Sub-Categories"
+    )
+
+    fig.update_layout(
+        template="plotly_white",
+        title_x=0.5,
+        paper_bgcolor="white",
+        plot_bgcolor="white"
+    )
+
+    st.plotly_chart(
+        fig,
+        use_container_width=True
+    )
+
+# ==========================
 # Top Cities
 # ==========================
 
