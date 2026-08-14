@@ -289,6 +289,7 @@ with col1:
 
     st.plotly_chart(fig, use_container_width=True)
 
+
 # --------------------------
 # Interactive Pie Chart
 # --------------------------
@@ -309,6 +310,80 @@ with col2:
         values="Sales",
         title="Sales Distribution by Category",
         hole=0.4
+    )
+
+    fig.update_layout(
+        template="plotly_white",
+        title_x=0.5,
+        paper_bgcolor="white",
+        plot_bgcolor="white"
+    )
+
+    st.plotly_chart(fig, use_container_width=True)
+
+# ==========================
+# Regional Performance
+# ==========================
+
+st.divider()
+
+st.subheader("🌍 Regional Performance")
+
+col1, col2 = st.columns(2)
+
+# --------------------------
+# Sales by Region
+# --------------------------
+
+with col1:
+
+    st.write("💰 **Sales by Region**")
+
+    sales_by_region = (
+        filtered_df.groupby("Region")["Sales"]
+        .sum()
+        .sort_values(ascending=False)
+        .reset_index()
+    )
+
+    fig = px.bar(
+        sales_by_region,
+        x="Region",
+        y="Sales",
+        color="Region",
+        title="Sales by Region"
+    )
+
+    fig.update_layout(
+        template="plotly_white",
+        title_x=0.5,
+        paper_bgcolor="white",
+        plot_bgcolor="white"
+    )
+
+    st.plotly_chart(fig, use_container_width=True)
+
+# --------------------------
+# Profit by Region
+# --------------------------
+
+with col2:
+
+    st.write("📈 **Profit by Region**")
+
+    profit_by_region = (
+        filtered_df.groupby("Region")["Profit"]
+        .sum()
+        .sort_values(ascending=False)
+        .reset_index()
+    )
+
+    fig = px.bar(
+        profit_by_region,
+        x="Region",
+        y="Profit",
+        color="Region",
+        title="Profit by Region"
     )
 
     fig.update_layout(
@@ -1466,10 +1541,11 @@ def generate_pdf_report():
     story.append(Paragraph(f"Total Sales: ${total_sales:,.2f}", styles["BodyText"]))
     story.append(Paragraph(f"Total Profit: ${total_profit:,.2f}", styles["BodyText"]))
     story.append(Paragraph(f"Total Orders: {total_orders}", styles["BodyText"]))
+    avg_sales = filtered_df["Sales"].mean()
+    avg_profit = filtered_df["Profit"].mean()
     story.append(Paragraph(f"Average Sales: ${avg_sales:,.2f}", styles["BodyText"]))
     story.append(Paragraph(f"Average Profit: ${avg_profit:,.2f}", styles["BodyText"]))
     story.append(Paragraph(f"Business Score: {score}/100", styles["BodyText"]))
-
     story.append(Paragraph("<br/>", styles["Normal"]))
 
     story.append(
