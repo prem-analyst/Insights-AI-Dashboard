@@ -1130,6 +1130,70 @@ if st.button("🚀 Ask AI"):
                 hide_index=True
             )
 
+            # --------------------------------
+    # Discount Risk Analysis
+    # --------------------------------
+
+    elif (
+        ("high discount" in q or "highest discount" in q)
+        and ("low profit" in q or "lowest profit" in q)
+    ):
+
+        if dimension == "category":
+            group_col = "Category"
+
+        elif dimension == "sub_category":
+            group_col = "Sub-Category"
+
+        elif dimension == "region":
+            group_col = "Region"
+
+        elif dimension == "state":
+            group_col = "State"
+
+        elif dimension == "city":
+            group_col = "City"
+
+        elif dimension == "segment":
+            group_col = "Segment"
+
+        else:
+            group_col = "Category"
+
+        comparison = (
+            filtered_df.groupby(group_col)[
+                ["Sales", "Profit", "Discount"]
+            ]
+            .mean()
+            .reset_index()
+        )
+
+        if comparison.empty:
+
+            st.warning("No data available for the current filters.")
+
+        else:
+
+            comparison = comparison.sort_values(
+                ["Discount", "Profit"],
+                ascending=[False, True]
+            ).head(5)
+
+            st.subheader("🎯 Discount Risk Analysis")
+
+            st.write(
+                f"These {group_col.lower()}s have relatively high "
+                "discounts and weaker profitability."
+            )
+
+            st.dataframe(
+                comparison[
+                    [group_col, "Sales", "Profit", "Discount"]
+                ],
+                use_container_width=True,
+                hide_index=True
+            )
+
         # --------------------------------
     # Loss / Negative Profit
     # --------------------------------
