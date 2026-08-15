@@ -203,6 +203,256 @@ with st.expander("📋 View Dataset Preview"):
     st.dataframe(filtered_df.head())
 
 # ==========================
+# Profit Analysis Page
+# ==========================
+
+if page == "💰 Profit Analysis":
+
+    st.header("💰 Profit Analysis")
+
+    # Profit by Category
+    st.subheader("💰 Profit by Category")
+
+    profit_by_category = (
+        filtered_df.groupby("Category")["Profit"]
+        .sum()
+        .reset_index()
+    )
+
+    fig = px.bar(
+        profit_by_category,
+        x="Category",
+        y="Profit",
+        color="Category",
+        title="Profit by Category"
+    )
+
+    fig.update_layout(
+        template="plotly_white",
+        title_x=0.5
+    )
+
+    st.plotly_chart(fig, use_container_width=True)
+
+    # Top Sub-Categories by Profit
+    st.subheader("📈 Top 10 Sub-Categories by Profit")
+
+    profit_by_subcategory = (
+        filtered_df.groupby("Sub-Category")["Profit"]
+        .sum()
+        .sort_values(ascending=False)
+        .head(10)
+        .sort_values()
+        .reset_index()
+    )
+
+    fig = px.bar(
+        profit_by_subcategory,
+        x="Profit",
+        y="Sub-Category",
+        orientation="h",
+        color="Sub-Category",
+        title="Top 10 Sub-Categories by Profit"
+    )
+
+    fig.update_layout(
+        template="plotly_white",
+        title_x=0.5
+    )
+
+    st.plotly_chart(fig, use_container_width=True)
+
+    # Loss-Making Sub-Categories
+    st.subheader("🔴 Loss-Making Sub-Categories")
+
+    loss_by_subcategory = (
+        filtered_df.groupby("Sub-Category")["Profit"]
+        .sum()
+        .reset_index()
+    )
+
+    loss_by_subcategory = (
+        loss_by_subcategory[
+            loss_by_subcategory["Profit"] < 0
+        ]
+        .sort_values("Profit")
+    )
+
+    if loss_by_subcategory.empty:
+
+        st.success(
+            "🎉 No loss-making sub-categories found for the current filters."
+        )
+
+    else:
+
+        fig = px.bar(
+            loss_by_subcategory,
+            x="Profit",
+            y="Sub-Category",
+            orientation="h",
+            color="Profit",
+            title="Loss-Making Sub-Categories"
+        )
+
+        fig.update_layout(
+            template="plotly_white",
+            title_x=0.5
+        )
+
+        st.plotly_chart(fig, use_container_width=True)
+
+    # Top Cities by Profit
+    st.subheader("🏙️ Top 10 Cities by Profit")
+
+    top_profit = (
+        filtered_df.groupby("City")["Profit"]
+        .sum()
+        .sort_values(ascending=False)
+        .head(10)
+        .reset_index()
+    )
+
+    fig = px.bar(
+        top_profit,
+        x="Profit",
+        y="City",
+        orientation="h",
+        color="Profit",
+        title="Top 10 Cities by Profit"
+    )
+
+    fig.update_layout(
+        template="plotly_white",
+        title_x=0.5
+    )
+
+    st.plotly_chart(fig, use_container_width=True)
+
+    st.stop()
+
+# ==========================
+# Sales Analysis Page
+# ==========================
+
+if page == "📊 Sales Analysis":
+
+    st.header("📊 Sales Analysis")
+
+    # Sales by Category
+    st.subheader("📊 Sales by Category")
+
+    sales_by_category = (
+        filtered_df.groupby("Category")["Sales"]
+        .sum()
+        .reset_index()
+    )
+
+    fig = px.bar(
+        sales_by_category,
+        x="Category",
+        y="Sales",
+        color="Category",
+        title="Sales by Category"
+    )
+
+    fig.update_layout(
+        template="plotly_white",
+        title_x=0.5
+    )
+
+    st.plotly_chart(fig, use_container_width=True)
+
+    # Sales Share
+    st.subheader("🥧 Sales Share by Category")
+
+    sales_share = (
+        filtered_df.groupby("Category")["Sales"]
+        .sum()
+        .reset_index()
+    )
+
+    fig = px.pie(
+        sales_share,
+        names="Category",
+        values="Sales",
+        title="Sales Distribution by Category",
+        hole=0.4
+    )
+
+    fig.update_layout(
+        template="plotly_white",
+        title_x=0.5
+    )
+
+    st.plotly_chart(fig, use_container_width=True)
+
+    # Top Sub-Categories by Sales
+    st.subheader("🏆 Top 10 Sub-Categories by Sales")
+
+    sales_by_subcategory = (
+        filtered_df.groupby("Sub-Category")["Sales"]
+        .sum()
+        .sort_values(ascending=False)
+        .head(10)
+        .sort_values()
+        .reset_index()
+    )
+
+    fig = px.bar(
+        sales_by_subcategory,
+        x="Sales",
+        y="Sub-Category",
+        orientation="h",
+        color="Sub-Category",
+        title="Top 10 Sub-Categories by Sales"
+    )
+
+    fig.update_layout(
+        template="plotly_white",
+        title_x=0.5
+    )
+
+    st.plotly_chart(fig, use_container_width=True)
+
+    # Top Cities by Sales
+    st.subheader("🏙️ Top 10 Cities by Sales")
+
+    top_sales = (
+        filtered_df.groupby("City")["Sales"]
+        .sum()
+        .sort_values(ascending=False)
+        .head(10)
+        .reset_index()
+    )
+
+    fig = px.bar(
+        top_sales,
+        x="Sales",
+        y="City",
+        orientation="h",
+        color="Sales",
+        title="Top 10 Cities by Sales"
+    )
+
+    fig.update_layout(
+        template="plotly_white",
+        title_x=0.5
+    )
+
+    st.plotly_chart(fig, use_container_width=True)
+
+    st.stop()
+
+# ==========================
+# Page Content Control
+# ==========================
+
+if page != "🏠 Dashboard":
+    st.info("🚧 This section is being organized into its dedicated navigation page.")
+    st.stop()
+
+# ==========================
 # KPI Metrics
 # ==========================
 
