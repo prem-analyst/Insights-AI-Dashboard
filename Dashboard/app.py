@@ -1591,75 +1591,6 @@ Try asking about:
 """
         )
 
-# ==========================
-# Top Products Analysis
-# ==========================
-
-st.divider()
-
-st.subheader("🏆 Top Products Analysis")
-
-col1, col2 = st.columns(2)
-
-# -------------------------
-# Top Products by Sales
-# -------------------------
-
-with col1:
-
-    top_products_sales = (
-        filtered_df.groupby("Sub-Category")["Sales"]
-        .sum()
-        .sort_values(ascending=False)
-        .head(10)
-        .reset_index()
-    )
-
-    fig = px.bar(
-        top_products_sales,
-        x="Sales",
-        y="Sub-Category",
-        orientation="h",
-        color="Sales",
-        title="Top 10 Products by Sales"
-    )
-
-    fig.update_layout(
-        template="plotly_white",
-        title_x=0.5
-    )
-
-    st.plotly_chart(fig, use_container_width=True)
-
-# -------------------------
-# Top Products by Profit
-# -------------------------
-
-with col2:
-
-    top_products_profit = (
-        filtered_df.groupby("Sub-Category")["Profit"]
-        .sum()
-        .sort_values(ascending=False)
-        .head(10)
-        .reset_index()
-    )
-
-    fig = px.bar(
-        top_products_profit,
-        x="Profit",
-        y="Sub-Category",
-        orientation="h",
-        color="Profit",
-        title="Top 10 Products by Profit"
-    )
-
-    fig.update_layout(
-        template="plotly_white",
-        title_x=0.5
-    )
-
-    st.plotly_chart(fig, use_container_width=True)
 
 def generate_pdf_report():
 
@@ -1731,3 +1662,4 @@ st.markdown(
     """,
     unsafe_allow_html=True
 )
+
