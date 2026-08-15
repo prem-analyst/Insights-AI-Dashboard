@@ -1059,6 +1059,77 @@ if st.button("🚀 Ask AI"):
                 f"{total_quantity:,.0f}"
             )
 
+        
+        # --------------------------------
+    # Advanced Business Analysis
+    # --------------------------------
+
+    elif (
+        ("high sales" in q or "highest sales" in q)
+        and ("low profit" in q or "lowest profit" in q)
+    ):
+
+        if dimension == "category":
+            group_col = "Category"
+
+        elif dimension == "sub_category":
+            group_col = "Sub-Category"
+
+        elif dimension == "region":
+            group_col = "Region"
+
+        elif dimension == "state":
+            group_col = "State"
+
+        elif dimension == "city":
+            group_col = "City"
+
+        elif dimension == "segment":
+            group_col = "Segment"
+
+        else:
+            group_col = "Category"
+
+        comparison = (
+            filtered_df.groupby(group_col)[["Sales", "Profit"]]
+            .sum()
+            .reset_index()
+        )
+
+        if comparison.empty:
+
+            st.warning("No data available for the current filters.")
+
+        else:
+
+            comparison["Profit Margin"] = (
+                comparison["Profit"] / comparison["Sales"] * 100
+            ).where(comparison["Sales"] != 0, 0)
+
+            high_sales_low_profit = (
+                comparison
+                .sort_values(
+                    ["Sales", "Profit"],
+                    ascending=[False, True]
+                )
+                .head(5)
+            )
+
+            st.subheader("🧠 High Sales but Low Profit Analysis")
+
+            st.write(
+                f"These {group_col.lower()}s generate strong sales "
+                "but comparatively weaker profit."
+            )
+
+            st.dataframe(
+                high_sales_low_profit[
+                    [group_col, "Sales", "Profit", "Profit Margin"]
+                ],
+                use_container_width=True,
+                hide_index=True
+            )
+
         # --------------------------------
     # Loss / Negative Profit
     # --------------------------------
@@ -1574,6 +1645,7 @@ if st.button("🚀 Ask AI"):
             f"💰 Highest Sales Sub-Category: **{best}** "
             f"(${result.max():,.2f} sales)"
         )
+
 
     # --------------------------------
     # Fallback
