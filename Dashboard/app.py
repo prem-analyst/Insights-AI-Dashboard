@@ -1194,6 +1194,110 @@ if st.button("🚀 Ask AI"):
                 hide_index=True
             )
 
+            # --------------------------------
+    # Business Opportunity Analysis
+    # --------------------------------
+
+    elif (
+        ("best opportunity" in q or
+         "business opportunity" in q or
+         "best business" in q)
+        and (
+            "category" in q or
+            "sub-category" in q or
+            "subcategory" in q or
+            "region" in q or
+            "state" in q or
+            "city" in q or
+            "segment" in q
+        )
+    ):
+
+        if dimension == "category":
+            group_col = "Category"
+
+        elif dimension == "sub_category":
+            group_col = "Sub-Category"
+
+        elif dimension == "region":
+            group_col = "Region"
+
+        elif dimension == "state":
+            group_col = "State"
+
+        elif dimension == "city":
+            group_col = "City"
+
+        elif dimension == "segment":
+            group_col = "Segment"
+
+        else:
+            group_col = "Category"
+
+        opportunity = (
+            filtered_df.groupby(group_col)[
+                ["Sales", "Profit"]
+            ]
+            .sum()
+            .reset_index()
+        )
+
+        if opportunity.empty:
+
+            st.warning(
+                "No data available for the current filters."
+            )
+
+        else:
+
+            opportunity["Profit Margin"] = (
+                opportunity["Profit"] /
+                opportunity["Sales"] * 100
+            ).where(
+                opportunity["Sales"] != 0,
+                0
+            )
+
+            opportunity["Opportunity Score"] = (
+                opportunity["Profit Margin"] * 0.5
+                + (
+                    opportunity["Sales"] /
+                    opportunity["Sales"].max()
+                ) * 50
+            )
+
+            opportunity = (
+                opportunity
+                .sort_values(
+                    "Opportunity Score",
+                    ascending=False
+                )
+                .head(5)
+            )
+
+            st.subheader(
+                "💎 Business Opportunity Analysis"
+            )
+
+            st.write(
+                f"These {group_col.lower()}s show the strongest "
+                "combination of sales performance and profitability."
+            )
+
+            st.dataframe(
+                opportunity[
+                    [
+                        group_col,
+                        "Sales",
+                        "Profit",
+                        "Profit Margin",
+                        "Opportunity Score"
+                    ]
+                ],
+                use_container_width=True,
+                hide_index=True
+            )
+
         # --------------------------------
     # Loss / Negative Profit
     # --------------------------------
