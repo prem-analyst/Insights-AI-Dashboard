@@ -445,6 +445,121 @@ if page == "📊 Sales Analysis":
     st.stop()
 
 # ==========================
+# Geography Page
+# ==========================
+
+if page == "🌍 Geography":
+
+    st.header("🌍 Geography Analysis")
+
+    # Regional Performance
+    st.subheader("🌍 Regional Performance")
+
+    col1, col2 = st.columns(2)
+
+    with col1:
+
+        st.write("💰 **Sales by Region**")
+
+        sales_by_region = (
+            filtered_df.groupby("Region")["Sales"]
+            .sum()
+            .sort_values(ascending=False)
+            .reset_index()
+        )
+
+        fig = px.bar(
+            sales_by_region,
+            x="Region",
+            y="Sales",
+            color="Region",
+            title="Sales by Region"
+        )
+
+        fig.update_layout(
+            template="plotly_white",
+            title_x=0.5
+        )
+
+        st.plotly_chart(fig, use_container_width=True)
+
+    with col2:
+
+        st.write("📈 **Profit by Region**")
+
+        profit_by_region = (
+            filtered_df.groupby("Region")["Profit"]
+            .sum()
+            .sort_values(ascending=False)
+            .reset_index()
+        )
+
+        fig = px.bar(
+            profit_by_region,
+            x="Region",
+            y="Profit",
+            color="Region",
+            title="Profit by Region"
+        )
+
+        fig.update_layout(
+            template="plotly_white",
+            title_x=0.5
+        )
+
+        st.plotly_chart(fig, use_container_width=True)
+
+    # Sales by State
+    st.subheader("🗺️ Sales by State")
+
+    state_sales = (
+        filtered_df.groupby("State")["Sales"]
+        .sum()
+        .reset_index()
+    )
+
+    fig = px.choropleth(
+        state_sales,
+        locations="State",
+        locationmode="USA-states",
+        color="Sales",
+        scope="usa",
+        color_continuous_scale="Blues",
+        hover_name="State",
+        title="State-wise Sales Distribution"
+    )
+
+    fig.update_layout(
+        template="plotly_white",
+        title_x=0.5
+    )
+
+    st.plotly_chart(fig, use_container_width=True)
+
+    # Profit vs Discount
+    st.subheader("💹 Profit vs Discount Analysis")
+
+    fig = px.scatter(
+        filtered_df,
+        x="Discount",
+        y="Profit",
+        color="Category",
+        size="Sales",
+        hover_data=["Sub-Category", "Region"],
+        title="Profit vs Discount"
+    )
+
+    fig.update_layout(
+        template="plotly_white",
+        title_x=0.5
+    )
+
+    st.plotly_chart(fig, use_container_width=True)
+
+    st.stop()
+
+
+# ==========================
 # Page Content Control
 # ==========================
 
@@ -1044,6 +1159,7 @@ else:
 st.caption(
     "Score is calculated based on Sales, Profit, Discount and Quantity performance."
 )
+
 
 # ==========================
 # AI Business Insights
