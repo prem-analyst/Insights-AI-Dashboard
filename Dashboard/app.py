@@ -1,4 +1,4 @@
-import plotly.express as px
+﻿import plotly.express as px
 import streamlit as st
 import pandas as pd
 from pathlib import Path
@@ -129,7 +129,6 @@ page = st.sidebar.radio(
         "📊 Sales Analysis",
         "💰 Profit Analysis",
         "🌍 Geography",
-        "🤖 AI Insights",
         "ℹ️ About"
     ]
 )
@@ -558,6 +557,70 @@ if page == "🌍 Geography":
 
     st.stop()
 
+# ==========================
+# About Page
+# ==========================
+
+if page == "ℹ️ About":
+
+    st.header("ℹ️ About Insights AI")
+
+    st.write(
+        "Insights AI is an interactive business analytics dashboard "
+        "designed to transform transactional sales data into meaningful "
+        "business insights and actionable recommendations."
+    )
+
+    st.divider()
+
+    st.subheader("📊 Project Overview")
+
+    st.write(
+        "The dashboard analyzes sales, profit, discount, quantity, "
+        "categories, sub-categories, regions, states, cities, and "
+        "customer segments through interactive business analytics."
+    )
+
+    st.subheader("🛠️ Technologies Used")
+
+    st.write(
+        "Python • Pandas • Streamlit • Plotly • Git/GitHub"
+    )
+
+    st.subheader("🚀 Key Features")
+
+    st.write(
+        """
+        - Interactive KPI tracking
+        - Sales and Profit Analysis
+        - Geography and Regional Analysis
+        - Discount and Profit analysis
+        - Business Performance Score
+        - AI-powered Business Insights
+        - Interactive Ask AI interface
+        - Filtered data export
+        - PDF business report generation
+        """
+    )
+
+    st.subheader("🎯 Project Objective")
+
+    st.write(
+        "The objective of Insights AI is to help users understand "
+        "business performance quickly and support data-driven decision-making."
+    )
+
+    st.divider()
+
+    st.subheader("👨‍💻 Developed By")
+
+    st.write("**Prem Mohite**")
+
+    st.caption(
+        "BSc Computer Science | Data Analyst"
+    )
+
+    st.stop()
 
 # ==========================
 # Page Content Control
